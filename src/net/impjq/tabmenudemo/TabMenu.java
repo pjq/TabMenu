@@ -4,6 +4,7 @@ package net.impjq.tabmenudemo;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,77 +17,135 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout.LayoutParams;
 
+import java.util.ArrayList;
+
 /**
  * @author pengjianqing@gmail.com
  * @version create at：2011-7-12 下午03:27:40
  */
 public class TabMenu extends PopupWindow {
-    private GridView gvBody, gvTitle;
+    private GridView mTabMenuBody;
+    private GridView mTabMenuTitle;
     private LinearLayout mLayout;
-    private MenuTitleAdapter titleAdapter;
+    private MenuTitleAdapter mTabMenuTitleAdapter;
 
-    public TabMenu(Context context, OnItemClickListener titleClick, OnItemClickListener bodyClick,
-            MenuTitleAdapter titleAdapter, int colorBgTabMenu, int aniTabMenu) {
+    static class TabMenuEntity {
+        String mTitleText;
+        int mTitleTextSize;
+        int mTitleTextColor;
+        int mTitleSelectedColor;
+        int mTitleUnSelectedColor;
+        Drawable mTitleIcon;
+        boolean mEnable;
+
+        public TabMenuEntity(String titleText, int titleTextSize, int titleTextColor,
+                int titleSelectedColor,
+                int titleUnSelectedColor, Drawable titleIcon, boolean enable) {
+            // TODO Auto-generated constructor stub
+            mTitleText = titleText;
+            mTitleTextSize = titleTextSize;
+            mTitleTextColor = titleTextColor;
+            mTitleSelectedColor = titleSelectedColor;
+            mTitleUnSelectedColor = titleUnSelectedColor;
+            mTitleIcon = titleIcon;
+            mEnable = enable;
+        }
+    }
+
+    static class TabMenuBodyEntity {
+        String mTitleText;
+        int mTitleTextSize;
+        int mTitleTextColor;
+        int mTitleSelectedColor;
+        int mTitleUnSelectedColor;
+        Drawable mTitleIcon;
+        boolean mEnable;
+
+        public TabMenuBodyEntity(String titleText, int titleTextSize, int titleTextColor,
+                int titleSelectedColor,
+                int titleUnSelectedColor, Drawable titleIcon, boolean enable) {
+            // TODO Auto-generated constructor stub
+            mTitleText = titleText;
+            mTitleTextSize = titleTextSize;
+            mTitleTextColor = titleTextColor;
+            mTitleSelectedColor = titleSelectedColor;
+            mTitleUnSelectedColor = titleUnSelectedColor;
+            mTitleIcon = titleIcon;
+            mEnable = enable;
+        }
+    }
+
+    public TabMenu(Context context, OnItemClickListener titleOnItemClickListener,
+            OnItemClickListener bodyOnItemClickListener,
+            MenuTitleAdapter tabMenuTitleAdapter, int tabMenuBackgroundColor, int tabMenuAnimation) {
         super(context);
 
         mLayout = new LinearLayout(context);
         mLayout.setOrientation(LinearLayout.VERTICAL);
-        // 标题选项栏
-        gvTitle = new GridView(context);
-        gvTitle.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
+        // TabMenu Titlebar GridView
+        mTabMenuTitle = new GridView(context);
+        mTabMenuTitle.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
                 LayoutParams.WRAP_CONTENT));
-        gvTitle.setNumColumns(titleAdapter.getCount());
-        gvTitle.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
-        gvTitle.setVerticalSpacing(1);
-        gvTitle.setHorizontalSpacing(1);
-        gvTitle.setGravity(Gravity.CENTER);
-        gvTitle.setOnItemClickListener(titleClick);
-        gvTitle.setAdapter(titleAdapter);
-        gvTitle.setSelector(new ColorDrawable(Color.TRANSPARENT));// 选中的时候为透明色
-        this.titleAdapter = titleAdapter;
-        // 子选项栏
-        gvBody = new GridView(context);
-        gvBody.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
-        gvBody.setSelector(new ColorDrawable(Color.TRANSPARENT));// 选中的时候为透明色
-        gvBody.setNumColumns(4);
-        gvBody.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
-        gvBody.setVerticalSpacing(10);
-        gvBody.setHorizontalSpacing(10);
-        gvBody.setPadding(10, 10, 10, 10);
-        gvBody.setGravity(Gravity.CENTER);
-        gvBody.setOnItemClickListener(bodyClick);
-        mLayout.addView(gvTitle);
-        mLayout.addView(gvBody);
+        mTabMenuTitle.setNumColumns(tabMenuTitleAdapter.getCount());
+        mTabMenuTitle.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+        mTabMenuTitle.setVerticalSpacing(1);
+        mTabMenuTitle.setHorizontalSpacing(1);
+        mTabMenuTitle.setGravity(Gravity.CENTER);
+        mTabMenuTitle.setOnItemClickListener(titleOnItemClickListener);
+        mTabMenuTitle.setAdapter(tabMenuTitleAdapter);
+        // When selected,set to transparent.
+        mTabMenuTitle.setSelector(new ColorDrawable(Color.TRANSPARENT));
+        this.mTabMenuTitleAdapter = tabMenuTitleAdapter;
+        // TabMenu SubMenu GridView
+        mTabMenuBody = new GridView(context);
+        mTabMenuBody.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
+                LayoutParams.WRAP_CONTENT));
+        // When selected,set to transparent.
+        mTabMenuBody.setSelector(new ColorDrawable(Color.TRANSPARENT));
+        mTabMenuBody.setNumColumns(4);
+        mTabMenuBody.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+        mTabMenuBody.setVerticalSpacing(10);
+        mTabMenuBody.setHorizontalSpacing(10);
+        mTabMenuBody.setPadding(10, 10, 10, 10);
+        mTabMenuBody.setGravity(Gravity.CENTER);
+        mTabMenuBody.setOnItemClickListener(bodyOnItemClickListener);
+        mLayout.addView(mTabMenuTitle);
+        mLayout.addView(mTabMenuBody);
 
-        // 设置默认项
+        // Default Settings
         this.setContentView(mLayout);
         this.setWidth(LayoutParams.FILL_PARENT);
         this.setHeight(LayoutParams.WRAP_CONTENT);
-        this.setBackgroundDrawable(new ColorDrawable(colorBgTabMenu));// 设置TabMenu菜单背景
-        this.setAnimationStyle(aniTabMenu);
-        this.setFocusable(true);// menu菜单获得焦点 如果没有获得焦点menu菜单中的控件事件无法响应
+
+        // Set the TabMenu background
+        this.setBackgroundDrawable(new ColorDrawable(tabMenuBackgroundColor));
+        this.setAnimationStyle(tabMenuAnimation);
+        // SetFocusable to true,If not set set true,the item in the TabMenu will
+        // not handle the touch event.
+        this.setFocusable(true);
     }
 
-    public void SetTitleSelect(int index) {
-        gvTitle.setSelection(index);
-        this.titleAdapter.SetFocus(index);
+    public void setTabMenuTitleSelect(int index) {
+        mTabMenuTitle.setSelection(index);
+        this.mTabMenuTitleAdapter.SetFocus(index);
     }
 
-    public void SetBodySelect(int index, int colorSelBody) {
-        int count = gvBody.getChildCount();
+    public void setTabMenuBodySelect(int index, int bodySelectedColor) {
+        int count = mTabMenuBody.getChildCount();
         for (int i = 0; i < count; i++) {
             if (i != index)
-                ((LinearLayout) gvBody.getChildAt(i)).setBackgroundColor(Color.TRANSPARENT);
+                ((LinearLayout) mTabMenuBody.getChildAt(i)).setBackgroundColor(Color.TRANSPARENT);
         }
-        ((LinearLayout) gvBody.getChildAt(index)).setBackgroundColor(colorSelBody);
+        ((LinearLayout) mTabMenuBody.getChildAt(index)).setBackgroundColor(bodySelectedColor);
     }
 
-    public void SetBodyAdapter(MenuBodyAdapter bodyAdapter) {
-        gvBody.setAdapter(bodyAdapter);
+    public void setTabMenuBodyAdapter(MenuBodyAdapter bodyAdapter) {
+        mTabMenuBody.setAdapter(bodyAdapter);
     }
 
     /**
-     * 自定义Adapter，TabMenu的每个分页的主体
+     * The customer body adapter for the TabMenuBody,it extends the
+     * {@link BaseAdapter}
      */
     static public class MenuBodyAdapter extends BaseAdapter {
         private Context mContext;
@@ -156,7 +215,26 @@ public class TabMenu extends PopupWindow {
     static public class MenuTitleAdapter extends BaseAdapter {
         private Context mContext;
         private int fontColor, unselcolor, selcolor;
-        private TextView[] title;
+        private TextView[] mTitleTextView;
+        private ArrayList<TabMenuEntity> mTitleEntityList;
+
+        public MenuTitleAdapter(Context context, ArrayList<TabMenuEntity> titleEntityList) {
+            // TODO Auto-generated constructor stub
+            mTitleEntityList = titleEntityList;
+            mContext = context;
+
+            int length = mTitleEntityList.size();
+            this.mTitleTextView = new TextView[length];
+            for (int i = 0; i < length; i++) {
+                TabMenuEntity entity = mTitleEntityList.get(i);
+                mTitleTextView[i] = new TextView(mContext);
+                mTitleTextView[i].setText(entity.mTitleText);
+                mTitleTextView[i].setTextSize(entity.mTitleTextSize);
+                mTitleTextView[i].setTextColor(entity.mTitleTextColor);
+                mTitleTextView[i].setGravity(Gravity.CENTER);
+                mTitleTextView[i].setPadding(10, 10, 10, 10);
+            }
+        }
 
         /**
          * 设置TabMenu的title
@@ -174,51 +252,70 @@ public class TabMenu extends PopupWindow {
             this.fontColor = fontcolor;
             this.unselcolor = unselcolor;
             this.selcolor = selcolor;
-            this.title = new TextView[titles.length];
+            this.mTitleTextView = new TextView[titles.length];
             for (int i = 0; i < titles.length; i++) {
-                title[i] = new TextView(mContext);
-                title[i].setText(titles[i]);
-                title[i].setTextSize(fontSize);
-                title[i].setTextColor(fontColor);
-                title[i].setGravity(Gravity.CENTER);
-                title[i].setPadding(10, 10, 10, 10);
+                mTitleTextView[i] = new TextView(mContext);
+                mTitleTextView[i].setText(titles[i]);
+                mTitleTextView[i].setTextSize(fontSize);
+                mTitleTextView[i].setTextColor(fontColor);
+                mTitleTextView[i].setGravity(Gravity.CENTER);
+                mTitleTextView[i].setPadding(10, 10, 10, 10);
             }
         }
 
         public int getCount() {
-            return title.length;
+            return null == mTitleEntityList ? 0 : mTitleEntityList.size();
         }
 
         public Object getItem(int position) {
-            return title[position];
+            return null == mTitleEntityList ? 0 : mTitleEntityList.get(position);
         }
 
         public long getItemId(int position) {
-            return title[position].getId();
+            return position;
         }
 
         /**
          * 设置选中的效果
          */
         private void SetFocus(int index) {
-            for (int i = 0; i < title.length; i++) {
+            int length = getCount();
+            for (int i = 0; i < length; i++) {
                 if (i != index) {
-                    title[i].setBackgroundDrawable(new ColorDrawable(unselcolor));// 设置没选中的颜色
-                    title[i].setTextColor(fontColor);// 设置没选中项的字体颜色
+                    TabMenuEntity entity = mTitleEntityList.get(i);
+                    mTitleTextView[i].setBackgroundDrawable(new ColorDrawable(
+                            entity.mTitleUnSelectedColor));// 设置没选中的颜色
+                    mTitleTextView[i].setTextColor(entity.mTitleTextColor);// 设置没选中项的字体颜色
                 }
             }
-            title[index].setBackgroundColor(0x00);// 设置选中项的颜色
-            title[index].setTextColor(selcolor);// 设置选中项的字体颜色
+
+            TabMenuEntity ent = mTitleEntityList.get(index);
+            mTitleTextView[index].setBackgroundColor(0x00);// 设置选中项的颜色
+            mTitleTextView[index].setTextColor(ent.mTitleSelectedColor);// 设置选中项的字体颜色
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
             View v;
             if (convertView == null) {
-                v = title[position];
+                v = mTitleTextView[position];
             } else {
                 v = convertView;
             }
             return v;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            // TODO Auto-generated method stub
+            TabMenuEntity entity = mTitleEntityList.get(position);
+            boolean enable = true;
+            if (entity.mEnable) {
+                enable = true;
+            } else {
+                enable = false;
+            }
+
+            return enable;
         }
     }
 }
