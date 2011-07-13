@@ -11,6 +11,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -86,14 +87,54 @@ public class TabMenu extends PopupWindow {
             OnItemClickListener bodyOnItemClickListener,
             MenuTitleAdapter tabMenuTitleAdapter, int tabMenuBackgroundColor, int tabMenuAnimation) {
         super(context);
+        if (false) {
 
-        mLayout = new LinearLayout(context);
-        mLayout.setPadding(1, 1, 1, 1);
-        mLayout.setOrientation(LinearLayout.VERTICAL);
-        // TabMenu Titlebar GridView
-        mTabMenuTitle = new GridView(context);
-        mTabMenuTitle.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
-                LayoutParams.WRAP_CONTENT));
+            LinearLayout mParentLayout = new LinearLayout(context);
+
+            mLayout = new LinearLayout(context);
+            mLayout.setBackgroundResource(tabMenuBackgroundColor);
+            mLayout.setPadding(1, 1, 1, 1);
+            mLayout.setOrientation(LinearLayout.VERTICAL);
+            // TabMenu Titlebar GridView
+            mTabMenuTitle = new GridView(context);
+            mTabMenuTitle.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
+                    LayoutParams.WRAP_CONTENT));
+            mTabMenuTitle.setNumColumns(tabMenuTitleAdapter.getCount());
+            mTabMenuTitle.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+            mTabMenuTitle.setVerticalSpacing(1);
+            mTabMenuTitle.setHorizontalSpacing(1);
+            mTabMenuTitle.setGravity(Gravity.CENTER);
+            mTabMenuTitle.setOnItemClickListener(titleOnItemClickListener);
+            mTabMenuTitle.setAdapter(tabMenuTitleAdapter);
+            // When selected,set to transparent.
+            mTabMenuTitle.setSelector(new ColorDrawable(Color.TRANSPARENT));
+            this.mTabMenuTitleAdapter = tabMenuTitleAdapter;
+            // TabMenu SubMenu GridView
+            mTabMenuBody = new GridView(context);
+            mTabMenuBody.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
+                    LayoutParams.WRAP_CONTENT));
+            // When selected,set to transparent.
+            mTabMenuBody.setSelector(new ColorDrawable(Color.TRANSPARENT));
+            mTabMenuBody.setNumColumns(4);
+            mTabMenuBody.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+            mTabMenuBody.setVerticalSpacing(10);
+            mTabMenuBody.setHorizontalSpacing(10);
+            mTabMenuBody.setPadding(10, 10, 10, 10);
+            mTabMenuBody.setGravity(Gravity.CENTER);
+            mTabMenuBody.setOnItemClickListener(bodyOnItemClickListener);
+            mLayout.addView(mTabMenuTitle);
+            mLayout.addView(mTabMenuBody);
+
+            // Default Settings
+            // mParentLayout.addView(mLayout);
+            // this.setContentView(mParentLayout);
+        }
+
+        View layout = LayoutInflater.from(context).inflate(
+                R.layout.tab_menu_layout, null);
+        mTabMenuTitle = (GridView) layout.findViewById(R.id.tab_menu_layout_title_gridview);
+        mTabMenuBody = (GridView) layout.findViewById(R.id.tab_menu_layout_body_gridview);
+
         mTabMenuTitle.setNumColumns(tabMenuTitleAdapter.getCount());
         mTabMenuTitle.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
         mTabMenuTitle.setVerticalSpacing(1);
@@ -104,8 +145,7 @@ public class TabMenu extends PopupWindow {
         // When selected,set to transparent.
         mTabMenuTitle.setSelector(new ColorDrawable(Color.TRANSPARENT));
         this.mTabMenuTitleAdapter = tabMenuTitleAdapter;
-        // TabMenu SubMenu GridView
-        mTabMenuBody = new GridView(context);
+
         mTabMenuBody.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,
                 LayoutParams.WRAP_CONTENT));
         // When selected,set to transparent.
@@ -117,16 +157,18 @@ public class TabMenu extends PopupWindow {
         mTabMenuBody.setPadding(10, 10, 10, 10);
         mTabMenuBody.setGravity(Gravity.CENTER);
         mTabMenuBody.setOnItemClickListener(bodyOnItemClickListener);
-        mLayout.addView(mTabMenuTitle);
-        mLayout.addView(mTabMenuBody);
 
         // Default Settings
-        this.setContentView(mLayout);
+        // mParentLayout.addView(mLayout);
+        // this.setContentView(mParentLayout);
+        this.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        this.setContentView(layout);
         this.setWidth(LayoutParams.FILL_PARENT);
         this.setHeight(LayoutParams.WRAP_CONTENT);
 
         // Set the TabMenu background
-        this.setBackgroundDrawable(new ColorDrawable(tabMenuBackgroundColor));
+        // this.setBackgroundDrawable(new
+        // ColorDrawable(tabMenuBackgroundColor));
         this.setAnimationStyle(tabMenuAnimation);
         // SetFocusable to true,If not set set true,the item in the TabMenu will
         // not handle the touch event.
@@ -283,6 +325,7 @@ public class TabMenu extends PopupWindow {
                 mTitleTextView[i].setTextColor(entity.mTitleTextColor);
                 mTitleTextView[i].setGravity(Gravity.CENTER);
                 mTitleTextView[i].setPadding(10, 10, 10, 10);
+                mTitleTextView[i].setSingleLine(true);
             }
         }
 

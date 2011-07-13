@@ -1,6 +1,8 @@
 
 package net.impjq.tabmenudemo;
 
+import net.impjq.tabmenudemo.PopUpMenu.PopUpMenuAdapter;
+import net.impjq.tabmenudemo.PopUpMenu.PopUpMenuEntity;
 import net.impjq.tabmenudemo.TabMenu.MenuBodyAdapter;
 import net.impjq.tabmenudemo.TabMenu.TabMenuBodyEntity;
 import net.impjq.tabmenudemo.TabMenu.TabMenuEntity;
@@ -9,10 +11,12 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
@@ -35,6 +39,10 @@ public class TabMenuDemo extends Activity {
     int mTitleIndex = 0;
     int mMaxBodyItems = 8;
 
+    private ArrayList<PopUpMenuEntity> mPopUpMenuList;
+    private PopUpMenuAdapter mPopUpMenuAdapter;
+    private PopUpMenu mPopUpMenu;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,23 +54,7 @@ public class TabMenuDemo extends Activity {
     private void init() {
         // TODO Auto-generated method stub
         createTabMenu();
-        mTitleAdapter = new TabMenu.MenuTitleAdapter(getApplicationContext(), mTabMenuTitleList);
-
-        // createTabMenuBodyAdapterList();
-
-        mTtabMenu = new TabMenu(this,
-                new TitleClickListener(),
-                new BodyClickListener(),
-                mTitleAdapter,
-                // 0x55123456,// TabMenu的背景颜色
-                Color.BLACK,
-                R.style.PopupAnimation);// 出现与消失的动画
-
-        int defaultIndex = 0;
-
-        mTtabMenu.update();
-        mTtabMenu.setTabMenuTitleSelect(defaultIndex);
-        mTtabMenu.setTabMenuBodyAdapter(mTabMenuBodyAdapterList.get(defaultIndex));
+        createPopUpMenu();
     }
 
     /**
@@ -90,6 +82,7 @@ public class TabMenuDemo extends Activity {
     }
 
     private void createTabMenu() {
+
         mTabMenuTitleList = new ArrayList<TabMenu.TabMenuEntity>();
         mTabMenuBodyAdapterList = new ArrayList<TabMenu.MenuBodyAdapter>();
 
@@ -176,9 +169,70 @@ public class TabMenuDemo extends Activity {
         MenuBodyAdapter adapterMore = new MenuBodyAdapter(getApplicationContext(), bodyMore);
         mTabMenuBodyAdapterList.add(index, adapterMore);
 
+        mTitleAdapter = new TabMenu.MenuTitleAdapter(getApplicationContext(), mTabMenuTitleList);
+
+        mTtabMenu = new TabMenu(this,
+                new OnTabMenuTitleItemClickListener(),
+                new OnTabMenuBodyItemClickListener(),
+                mTitleAdapter,
+                 0x55123456,// TabMenu的背景颜色
+//                R.drawable.tab_menu_bkg,
+                R.style.PopupAnimation);// 出现与消失的动画
+
+        //mTtabMenu.
+        
+        int defaultIndex = 0;
+
+        mTtabMenu.update();
+        mTtabMenu.setTabMenuTitleSelect(defaultIndex);
+        mTtabMenu.setTabMenuBodyAdapter(mTabMenuBodyAdapterList.get(defaultIndex));
     }
 
-    class TitleClickListener implements OnItemClickListener {
+    private void createPopUpMenu() {
+        // TODO Auto-generated method stub
+
+        mPopUpMenuList = new ArrayList<PopUpMenuEntity>();
+
+        int index = 0;
+
+        // Normal TabMenu
+        PopUpMenuEntity entityNormal = new PopUpMenuEntity("About", 16, 0xFF222222,
+                Color.LTGRAY, Color.WHITE, R.drawable.menu_about, true, View.VISIBLE);
+        mPopUpMenuList.add(index, entityNormal);
+
+        // Tools TabMenu
+        ++index;
+        PopUpMenuEntity entityTool = new PopUpMenuEntity("Copy", 16, 0xFF222222,
+                Color.LTGRAY, Color.WHITE, R.drawable.menu_copy, true, View.VISIBLE);
+        mPopUpMenuList.add(index, entityTool);
+
+        // Settings TabMenu
+        ++index;
+        PopUpMenuEntity entitySettings = new PopUpMenuEntity("Cut", 16, 0xFF222222,
+                Color.LTGRAY, Color.WHITE, R.drawable.menu_cut, true, View.VISIBLE);
+        mPopUpMenuList.add(index, entitySettings);
+
+        // More TabMenu
+        ++index;
+        PopUpMenuEntity entityMore = new PopUpMenuEntity("Help", 16, 0xFF222222,
+                Color.LTGRAY, Color.WHITE, R.drawable.menu_help, true, View.VISIBLE);
+        mPopUpMenuList.add(index, entityMore);
+
+        mPopUpMenuAdapter = new PopUpMenuAdapter(getApplicationContext(), mPopUpMenuList);
+
+        mPopUpMenu = new PopUpMenu(this,
+                new OnPopUpMenuItemClickListener(),
+                mPopUpMenuAdapter,
+                // 0x55123456,// TabMenu的背景颜色
+                Color.BLACK,
+                R.style.PopupAnimation);// 出现与消失的动画
+
+        mPopUpMenu.update();
+        // mTtabMenu.setTabMenuTitleSelect(defaultIndex);
+
+    }
+
+    class OnTabMenuTitleItemClickListener implements OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
                 long arg3) {
@@ -188,7 +242,7 @@ public class TabMenuDemo extends Activity {
         }
     }
 
-    class BodyClickListener implements OnItemClickListener {
+    class OnTabMenuBodyItemClickListener implements OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
                 long arg3) {
@@ -201,8 +255,21 @@ public class TabMenuDemo extends Activity {
                     .get(arg2);
             String msg = bodyEntity.mText;
             Toast.makeText(getApplicationContext(), msg, 500).show();
+            mTtabMenu.dismiss();
         }
+    }
 
+    class OnPopUpMenuItemClickListener implements OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+                long arg3) {
+            mPopUpMenu.setPopUpMenuItemSelect(arg2, Color.GRAY);
+            PopUpMenuEntity entity = mPopUpMenuList.get(arg2);
+
+            String msg = entity.mText;
+            Toast.makeText(getApplicationContext(), msg, 500).show();
+            mTtabMenu.dismiss();
+        }
     }
 
     @Override
@@ -227,9 +294,29 @@ public class TabMenuDemo extends Activity {
             } else {
                 mTtabMenu.showAtLocation(findViewById(R.id.LinearLayout01),
                         Gravity.BOTTOM, 0, 0);
+
+                // showContextMenu();
             }
         }
         return false;// 返回为true 则显示系统menu
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        // TODO Auto-generated method stub
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    private void showContextMenu() {
+        // TODO Auto-generated method stub
+        mPopUpMenu.showAtLocation(findViewById(R.id.LinearLayout01),
+                Gravity.CENTER, 0, 0);
+    }
+
+    private void dismissContextMenu() {
+        if (mPopUpMenu.isShowing()) {
+            mPopUpMenu.dismiss();
+        }
     }
 
     @Override

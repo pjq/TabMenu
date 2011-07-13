@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="wrap_content"
+	android:orientation="vertical" android:padding="15dip">
+
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:orientation="vertical"
+		android:background="@drawable/tab_menu_bkg">
+
+		<GridView android:id="@+id/tab_menu_layout_title_gridview"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"></GridView>
+		<GridView android:id="@+id/tab_menu_layout_body_gridview"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"></GridView>
+	</LinearLayout>
+
+</LinearLayout>
